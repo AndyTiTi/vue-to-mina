@@ -1,5 +1,5 @@
-import './style/base.sass'
-import './vendor'
+import './styles/base.sass'
+// import './vendor'
 
 //app.js
 App({

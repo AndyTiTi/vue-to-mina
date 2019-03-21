@@ -1,47 +1,46 @@
-require('shelljs/global')
-const webpack = require('webpack')
-const fs = require('fs')
-const _ = require('lodash')
-const {resolve} = require('path')
+require('shelljs/global');
+const webpack = require('webpack');
+const fs = require('fs');
+const { resolve } = require('path');
+const r = url => resolve(__dirname, url);
 
-const r = url => resolve(process.cwd(), url)
+const webpackConfig = require('./webpack.conf');
+const minaConfig = require(r('../mina.config'));
+const assetsPath = r('../dist');
 
-const webpackConf = require('./webpack.conf')
-const config = require(r('./mina.config'))
-const assetsPath = r('./mina')
-
+//每次打包先清除输出目录，再创建输出目录（也就是dist文件夹）
 rm('-rf', assetsPath);
 mkdir(assetsPath);
 
-var renderConf = webpackConf
+var renderConfig = webpackConfig;
 
-var entry = () => _.reduce(config.json.pages, (en, i) => {
-  en[i] = resolve(process.cwd(), './', `${i}.mina`)
-  return entry
-})
+renderConfig.entry = minaConfig.json.pages.reduce((en, i) => {
+    en[i] = resolve(process.cwd(), './', `${i}.mina`)
 
-renderConf.entry = entry()
-renderConf.entry.app = config.app
+    return en;
+}, {});
 
-renderConf.output = {
-  path: r('./mina'),
-  filename: '[name].js'
+renderConfig.entry.app = minaConfig.app;
+
+renderConfig.output = {
+    path: r('../dist'),
+    filename: '[name].js'
 }
 
-var compiler = webpack(renderConf)
-fs.writeFileSync(r('./mina/app.json'), JSON.stringify(config.json), 'utf8')
-compiler.watch({
-  aggregateTimeout: 300,
-  poll: true
-}, (err, stats) => {
-  process.stdout.write(stats.toString({
-    colors: true,
-    modules: false,
-    children: true,
-    chunks: true,
-    chunkModules: true
-  }) + '\n\n')
-})
+var compiler = webpack(renderConfig);
 
-var shell = 'npm i babel-loader copy-webpack-plugin pug ramda regenerator-runtime wechat-mina-loader node-sass lodash babel-core babel-preset-env progress-bar-webpack-plugin shelljs st\n' +
-  'yle-loader postcss-loader extract-text-webpack-plugin';
+//写入小程序的app.json文件
+fs.writeFileSync(r('../dist/app.json'), JSON.stringify(minaConfig.json), 'utf8');
+
+compiler.watch({
+    aggregateTimeout: 300,
+    poll: true
+}, (err, stats) => {
+    process.stdout.write(stats.toString({
+        colors: true,
+        modules: false,
+        children: true,
+        chunks: true,
+        chunkModules: true
+    }) + '\n\n')
+});
