@@ -1,11 +1,11 @@
-<template>
-view.container.log-list
-  block(wx:for='', wx:for-item='log')
-    text.log-item .
+<template lang='pug'>
+  view.container.log-list
+    block(wx:for='{{logs}}', wx:for-item='log')
+      text.log-item {{index + 1}}. {{log}}
 </template>
 
 <script>
-var util = require('../../util/util.js');
+var util = require('../../utils/util.js');
 Page({
   data: {
     logs: []
